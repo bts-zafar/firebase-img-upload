@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+ 
+<head>
+    <meta charset="UTF-8">
+    <title>Firebase Img Upload</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css">
+</head>
+ 
+<body class="container"
+      style="margin-top: 50px;">
+    <form class="container" id="contactForm" >
+    <select class="form-control" id="types"  style="display: none;">
+      <option>1</option>
+    </select>
+</div>
+ 
+<br>
+    Document Upload:
+    <br>
+    <!-- click here to choose file -->
+    <input type="file" name="files[] " id="files" accept="image/*" onchange="previewImage()" >
+    <!-- Display Image in box-->
+    <br>
+    <img id="preview" width="250" height="250" style="border: 2px solid black;"> <br><br>
+    <!-- click here to upload file -->
+    <input type="hidden"
+           name="url"
+           id="url">   
+    <button type="button" onclick= "uploadimage()">
+               Upload Image
+            </button>
+           <br><br>
+    <label id="UpProgress"></label>
+  </div>
+</div>
+ 
+<button type="submit "
+        class="btn btn-primary"
+        style="margin-left: 15px; margin-top: 10px; display:none; ">
+                Submit
+  </button>
+ 
+</form>
+</body>
+<script src="https://www.gstatic.com/firebasejs/8.8.1/firebase.js "></script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js "></script>
+
+ 
+<link type="text/css " rel="stylesheet " href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.css " />
+ 
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js ">
+</script>
+ 
+<script>
+  
+ 
+  
+ // adding firebase data
+   var firebaseConfig = {
+    apiKey: "AIzaSyBBG7iWZ47f7ijTSyTMUMvdyr9vvi5ljv4",
+    authDomain: "uploadimg-99.firebaseapp.com",
+    databaseURL: "https://uploadimg-99-default-rtdb.firebaseio.com",
+    projectId: "uploadimg-99",
+    storageBucket: "uploadimg-99.appspot.com",
+    messagingSenderId: "397259661309",
+    appId: "1:397259661309:web:20402829b5bf9254be8394",
+    measurementId: "G-4T4Q4PJ48Q"
+  };
+  firebase.initializeApp(firebaseConfig);
+  
+  
+  var messagesRef = firebase.database().ref('Checking');
+  document.getElementById('contactForm').addEventListener('submit', submitForm);
+ 
+  //uploading file 
+  function uploadimage(){
+  var type = getInputVal('types');
+  var storage = firebase.storage();
+  var file=document.getElementById("files").files[0];
+  var storageref=storage.ref();
+  var thisref=storageref.child(type).child(file.name).put(file);
+  thisref.on('state_changed',function(snapshot) {   //progress bar
+    var progress = (snapshot.bytesTransferred /  snapshot.totalBytes) * 100;
+    document.getElementById('UpProgress').innerHTML = 'upload' + progress + '%'
+ 
+  }, function(error) {
+  
+ }, function() {
+  // Uploaded completed successfully, now we can get the download URL
+  thisref.snapshot.ref.getDownloadURL().then(function(downloadURL) {
+    //getting url of image
+    document.getElementById("url").value=downloadURL;
+    alert('uploaded successfully');
+    saveMessage(downloadURL);
+   });
+  });
+ 
+  // Get values
+  var url = getInputVal('url');
+
+}
+  // Image preview
+function previewImage() {
+        var file = document.getElementById("files").files;
+        if (file.length > 0) {
+            var fileReader = new FileReader();
+ 
+            fileReader.onload = function (event) {
+                document.getElementById("preview").setAttribute("src", event.target.result);
+            };
+ 
+            fileReader.readAsDataURL(file[0]);
+        }
+    }
+function getInputVal(id){
+    document.getElementById('contactForm').reset();
+ 
+}
+ 
+ 
+function getInputVal(id){
+  return document.getElementById(id).value;
+}
+ 
+function saveMessage(url){
+  var newMessageRef = messagesRef.push();
+  newMessageRef.set({
+   imageurl:url,
+  });
+
+}
+ 
+
+
+
+</script>
+</html>
